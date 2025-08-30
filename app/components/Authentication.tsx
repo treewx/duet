@@ -80,8 +80,8 @@ const Authentication = ({ onLogin }: AuthenticationProps) => {
         onLogin(user);
         return;
       } catch (apiError) {
-        // Fall back to localStorage method for existing users
-        console.log('API login failed, trying localStorage fallback');
+        // Silently fall back to localStorage method for existing users
+        // This happens when database isn't connected yet
       }
 
       // Fallback to localStorage method

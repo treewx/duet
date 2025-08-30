@@ -20,10 +20,6 @@ export default function Home() {
     const user = UserManager.getCurrentUser();
     if (user) {
       setCurrentUser(user);
-      // Create demo user if it doesn't exist
-      if (user.email === 'demo@duet.com') {
-        UserManager.createDemoUser();
-      }
     }
     setIsLoading(false);
   }, []);
@@ -31,8 +27,6 @@ export default function Home() {
   const handleLogin = (user: User) => {
     setCurrentUser(user);
     UserManager.setCurrentUser(user);
-    // Migrate existing data for first-time users
-    UserManager.migrateExistingData(user.id);
   };
 
   const handleLogout = () => {
