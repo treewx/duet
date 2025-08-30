@@ -1,0 +1,112 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  profile   UserProfile?
+  sentMatches     Match[] @relation("MatchSender")
+  receivedMatches Match[] @relation("MatchReceiver") 
+  sentMessages    Message[] @relation("MessageSender")
+  receivedMessages Message[] @relation("MessageReceiver")
+  chats           ChatParticipant[]
+
+  @@map("users")
+}
+
+model UserProfile {
+  id         String @id @default(cuid())
+  userId     String @unique
+  gender     String @default("")
+  preference String @default("")
+  photo      String @default("")
+  summary    String @default("")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  // Relationships
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+model Match {
+  id         String    @id @default(cuid())
+  senderId   String
+  receiverId String
+  rating     Int       @default(0) // 1-5 stars
+  status     String    @default("pending") // pending, accepted, rejected
+  createdAt  DateTime  @default(now())
+  
+  // Relationships
+  sender   User @relation("MatchSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("MatchReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  
+  @@unique([senderId, receiverId])
+  @@map("matches")
+}
+
+model Chat {
+  id        String   @id @default(cuid())
+  name      String?  // Optional chat name
+  isGroup   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relationships
+  participants ChatParticipant[]
+  messages     Message[]
+
+  @@map("chats")
+}
+
+model ChatParticipant {
+  id     String @id @default(cuid())
+  chatId String
+  userId String
+  joinedAt DateTime @default(now())
+  
+  // Relationships
+  chat Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([chatId, userId])
+  @@map("chat_participants")
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  chatId     String
+  senderId   String
+  receiverId String?  // For direct messages
+  content    String
+  type       String   @default("text") // text, image, etc.
+  createdAt  DateTime @default(now())
+  
+  // Relationships
+  chat     Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  sender   User @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User? @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: SetNull)
+
+  @@map("messages")
+}

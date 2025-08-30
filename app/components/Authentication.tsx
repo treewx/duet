@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { UserManager } from '../utils/userManager';
 
 interface User {
   id: string;
@@ -71,50 +72,53 @@ const Authentication = ({ onLogin }: AuthenticationProps) => {
     localStorage.setItem('duetUsers', JSON.stringify(users));
   };
 
-  const handleLogin = () => {
-    const users = getUsersFromStorage();
-    const user = users.find(u => 
-      u.email.toLowerCase() === formData.email.toLowerCase() && 
-      u.password === formData.password
-    );
+  const handleLogin = async () => {
+    try {
+      // Try new API first, fall back to localStorage for backward compatibility
+      try {
+        const user = await UserManager.login(formData.email, formData.password);
+        onLogin(user);
+        return;
+      } catch (apiError) {
+        // Fall back to localStorage method for existing users
+        console.log('API login failed, trying localStorage fallback');
+      }
 
-    if (user) {
-      // Set current user
-      localStorage.setItem('duetCurrentUser', JSON.stringify(user));
-      onLogin(user);
-    } else {
-      setErrors({ general: 'Invalid email or password' });
+      // Fallback to localStorage method
+      const users = getUsersFromStorage();
+      const user = users.find(u => 
+        u.email.toLowerCase() === formData.email.toLowerCase() && 
+        u.password === formData.password
+      );
+
+      if (user) {
+        // Migrate to database in background
+        try {
+          await UserManager.register(user.email, user.password, user.name);
+        } catch (e) {
+          // User might already exist in DB, try login
+          await UserManager.login(user.email, user.password);
+        }
+        onLogin(user);
+      } else {
+        setErrors({ general: 'Invalid email or password' });
+      }
+    } catch (error: any) {
+      setErrors({ general: error.message || 'Login failed' });
     }
   };
 
-  const handleSignup = () => {
-    const users = getUsersFromStorage();
-    
-    // Check if user already exists
-    const existingUser = users.find(u => 
-      u.email.toLowerCase() === formData.email.toLowerCase()
-    );
-
-    if (existingUser) {
-      setErrors({ email: 'An account with this email already exists' });
-      return;
+  const handleSignup = async () => {
+    try {
+      const user = await UserManager.register(formData.email, formData.password, formData.name);
+      onLogin(user);
+    } catch (error: any) {
+      if (error.message.includes('already exists')) {
+        setErrors({ email: error.message });
+      } else {
+        setErrors({ general: error.message || 'Registration failed' });
+      }
     }
-
-    // Create new user
-    const newUser: User = {
-      id: Date.now().toString(),
-      email: formData.email.toLowerCase(),
-      password: formData.password,
-      name: formData.name,
-      createdAt: Date.now()
-    };
-
-    users.push(newUser);
-    saveUsersToStorage(users);
-    
-    // Set current user
-    localStorage.setItem('duetCurrentUser', JSON.stringify(newUser));
-    onLogin(newUser);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -125,19 +129,17 @@ const Authentication = ({ onLogin }: AuthenticationProps) => {
     setIsLoading(true);
     setErrors({});
 
-    // Simulate API call delay
-    setTimeout(() => {
-      try {
-        if (isLogin) {
-          handleLogin();
-        } else {
-          handleSignup();
-        }
-      } catch (error) {
-        setErrors({ general: 'Something went wrong. Please try again.' });
+    try {
+      if (isLogin) {
+        await handleLogin();
+      } else {
+        await handleSignup();
       }
+    } catch (error: any) {
+      setErrors({ general: error.message || 'Something went wrong. Please try again.' });
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -163,21 +165,14 @@ const Authentication = ({ onLogin }: AuthenticationProps) => {
     setIsLoading(true);
     setErrors({});
 
-    // Simulate API call
-    setTimeout(() => {
-      const users = getUsersFromStorage();
-      const userExists = users.find(u => 
-        u.email.toLowerCase() === formData.email.toLowerCase()
-      );
-
-      if (userExists) {
-        setResetSuccess(true);
-        setErrors({});
-      } else {
-        setErrors({ email: 'No account found with this email address' });
-      }
+    try {
+      await UserManager.forgotPassword(formData.email);
+      setResetSuccess(true);
+    } catch (error: any) {
+      setErrors({ email: error.message || 'Request failed' });
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const switchMode = () => {

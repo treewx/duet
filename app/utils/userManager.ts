@@ -31,7 +31,55 @@ export class UserManager {
 
   static logout() {
     localStorage.removeItem('duetCurrentUser');
-    // Note: We keep profiles and other data for when user logs back in
+  }
+
+  // New API-based methods
+  static async login(email: string, password: string): Promise<User> {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'Login failed');
+    }
+
+    this.setCurrentUser(data.user);
+    return data.user;
+  }
+
+  static async register(email: string, password: string, name: string): Promise<User> {
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, name })
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'Registration failed');
+    }
+
+    this.setCurrentUser(data.user);
+    return data.user;
+  }
+
+  static async forgotPassword(email: string): Promise<void> {
+    const response = await fetch('/api/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'Request failed');
+    }
   }
 
   static getUserProfile(userId: string): UserProfile | null {
