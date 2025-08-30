@@ -28,14 +28,134 @@
   }
   
   .btn-primary {
-    @apply bg-primary text-white font-medium py-3 px-6 rounded-lg hover:bg-red-600 transition-colors;
+    @apply bg-primary text-white font-medium py-2 sm:py-3 px-4 sm:px-6 text-sm sm:text-base rounded-lg hover:bg-red-600 transition-colors;
   }
   
   .btn-secondary {
-    @apply bg-secondary text-white font-medium py-3 px-6 rounded-lg hover:bg-teal-600 transition-colors;
+    @apply bg-secondary text-white font-medium py-2 sm:py-3 px-4 sm:px-6 text-sm sm:text-base rounded-lg hover:bg-teal-600 transition-colors;
   }
   
   .card {
-    @apply bg-white rounded-xl shadow-md p-6;
+    @apply bg-white rounded-xl shadow-md p-4 sm:p-6;
+  }
+  
+  /* Mobile-optimized utilities */
+  .mobile-container {
+    @apply px-3 sm:px-4 lg:px-6;
+  }
+  
+  .mobile-text {
+    @apply text-sm sm:text-base;
+  }
+  
+  .mobile-heading {
+    @apply text-lg sm:text-xl lg:text-2xl;
+  }
+  
+  .mobile-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6;
+  }
+}
+
+/* Touch-friendly improvements for mobile */
+@media (max-width: 768px) {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Better spacing for mobile */
+  .mobile-spacing > * + * {
+    margin-top: 1rem;
+  }
+  
+  /* Larger text for better readability on mobile */
+  input, textarea, select {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+  }
+}
+
+/* Safe area support for mobile devices with notches */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-area-left {
+  padding-left: env(safe-area-inset-left);
+}
+
+.safe-area-right {
+  padding-right: env(safe-area-inset-right);
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 1rem);
+}
+
+/* Desktop optimizations */
+@media (min-width: 1024px) {
+  .desktop-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .desktop-sidebar {
+    width: 280px;
+  }
+  
+  .desktop-main {
+    margin-left: 280px;
+  }
+  
+  /* Desktop-specific layouts */
+  .desktop-layout {
+    display: flex;
+    height: 100vh;
+  }
+  
+  .desktop-content {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+/* PWA specific styles */
+@media (display-mode: standalone) {
+  body {
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Hide scrollbars in standalone mode */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  
+  * {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Improved focus states for accessibility */
+@media (min-width: 768px) {
+  *:focus {
+    outline: 2px solid #FF6B6B;
+    outline-offset: 2px;
+  }
+  
+  button:focus,
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: 2px solid #FF6B6B;
+    outline-offset: 2px;
   }
 }

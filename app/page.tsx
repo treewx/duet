@@ -81,16 +81,16 @@ export default function Home() {
   return (
     <div className="flex flex-col h-screen bg-background">
       {/* Header */}
-      <header className="bg-primary text-white p-4 shadow-lg">
+      <header className="bg-primary text-white p-3 sm:p-4 shadow-lg">
         <div className="flex items-center justify-between">
           <div className="flex-1" />
-          <h1 className="text-2xl font-bold">Duet</h1>
+          <h1 className="text-xl sm:text-2xl font-bold">Duet</h1>
           <div className="flex-1 flex justify-end">
-            <div className="flex items-center space-x-4">
-              <span className="text-sm">Hi, {currentUser.name}!</span>
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <span className="text-xs sm:text-sm hidden xs:block">Hi, {currentUser.name}!</span>
               <button
                 onClick={handleLogout}
-                className="text-sm bg-red-600 hover:bg-red-700 px-3 py-1 rounded-lg transition-colors"
+                className="text-xs sm:text-sm bg-red-600 hover:bg-red-700 px-2 sm:px-3 py-1 rounded-lg transition-colors touch-target"
               >
                 Logout
               </button>
@@ -101,22 +101,24 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
-        {renderContent()}
+        <div className="h-full">
+          {renderContent()}
+        </div>
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="bg-white border-t border-gray-200 px-4 py-2">
-        <div className="flex justify-around">
+      <nav className="bg-white border-t border-gray-200 px-2 sm:px-4 py-2 safe-area-bottom">
+        <div className="flex justify-around max-w-md mx-auto">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex flex-col items-center py-2 px-3 rounded-lg transition-colors ${
+              className={`flex flex-col items-center py-2 px-2 sm:px-3 rounded-lg transition-colors touch-target min-w-0 flex-1 ${
                 activeTab === tab.id ? 'tab-active' : 'tab-inactive'
               }`}
             >
-              <span className="text-xl mb-1">{tab.icon}</span>
-              <span className="text-xs font-medium">{tab.label}</span>
+              <span className="text-lg sm:text-xl mb-1">{tab.icon}</span>
+              <span className="text-xs font-medium leading-tight">{tab.label}</span>
             </button>
           ))}
         </div>

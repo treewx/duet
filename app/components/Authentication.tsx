@@ -16,6 +16,7 @@ interface AuthenticationProps {
 
 const Authentication = ({ onLogin }: AuthenticationProps) => {
   const [isLogin, setIsLogin] = useState(true);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -24,6 +25,7 @@ const Authentication = ({ onLogin }: AuthenticationProps) => {
   });
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [resetSuccess, setResetSuccess] = useState(false);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -147,8 +149,41 @@ const Authentication = ({ onLogin }: AuthenticationProps) => {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!formData.email) {
+      setErrors({ email: 'Please enter your email address' });
+      return;
+    }
+
+    if (!validateEmail(formData.email)) {
+      setErrors({ email: 'Please enter a valid email address' });
+      return;
+    }
+
+    setIsLoading(true);
+    setErrors({});
+
+    // Simulate API call
+    setTimeout(() => {
+      const users = getUsersFromStorage();
+      const userExists = users.find(u => 
+        u.email.toLowerCase() === formData.email.toLowerCase()
+      );
+
+      if (userExists) {
+        setResetSuccess(true);
+        setErrors({});
+      } else {
+        setErrors({ email: 'No account found with this email address' });
+      }
+      setIsLoading(false);
+    }, 1000);
+  };
+
   const switchMode = () => {
     setIsLogin(!isLogin);
+    setShowForgotPassword(false);
+    setResetSuccess(false);
     setFormData({
       email: '',
       password: '',
@@ -158,140 +193,218 @@ const Authentication = ({ onLogin }: AuthenticationProps) => {
     setErrors({});
   };
 
+  const showForgotPasswordForm = () => {
+    setShowForgotPassword(true);
+    setIsLogin(true);
+    setResetSuccess(false);
+    setFormData({
+      email: '',
+      password: '',
+      name: '',
+      confirmPassword: ''
+    });
+    setErrors({});
+  };
+
+  const backToLogin = () => {
+    setShowForgotPassword(false);
+    setResetSuccess(false);
+    setErrors({});
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10 p-3 sm:p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 sm:p-8 mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary mb-2">Duet</h1>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">
-            {isLogin ? 'Welcome Back!' : 'Join Duet'}
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-primary mb-2">Duet</h1>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">
+            {showForgotPassword ? 'Reset Password' : (isLogin ? 'Welcome Back!' : 'Join Duet')}
           </h2>
-          <p className="text-gray-600">
-            {isLogin 
-              ? 'Sign in to continue your journey' 
-              : 'Create your account to start connecting'
+          <p className="text-sm sm:text-base text-gray-600">
+            {showForgotPassword
+              ? 'Enter your email to receive reset instructions'
+              : (isLogin 
+                ? 'Sign in to continue your journey' 
+                : 'Create your account to start connecting'
+              )
             }
           </p>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {!isLogin && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name *
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
-                  errors.name ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="Enter your full name"
-              />
-              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email Address *
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
-                errors.email ? 'border-red-500' : 'border-gray-300'
-              }`}
-              placeholder="Enter your email"
-            />
-            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Password *
-            </label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
-                errors.password ? 'border-red-500' : 'border-gray-300'
-              }`}
-              placeholder="Enter your password"
-            />
-            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
-          </div>
-
-          {!isLogin && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Confirm Password *
-              </label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
-                  errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="Confirm your password"
-              />
-              {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
-            </div>
-          )}
-
-          {errors.general && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <p className="text-red-600 text-sm">{errors.general}</p>
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
-              isLoading
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-primary hover:bg-red-600 text-white'
-            }`}
-          >
-            {isLoading ? (
-              <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                {isLogin ? 'Signing In...' : 'Creating Account...'}
+        {/* Success Message for Reset */}
+        {resetSuccess && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div className="flex items-center">
+              <div className="text-green-600 mr-3">✓</div>
+              <div>
+                <p className="text-green-800 font-medium text-sm">Reset instructions sent!</p>
+                <p className="text-green-600 text-xs mt-1">Check your email for password reset instructions.</p>
               </div>
-            ) : (
-              isLogin ? 'Sign In' : 'Create Account'
+            </div>
+          </div>
+        )}
+
+        {/* Form */}
+        {!resetSuccess && (
+          <form onSubmit={showForgotPassword ? (e) => { e.preventDefault(); handleForgotPassword(); } : handleSubmit} className="space-y-4 sm:space-y-6">
+            {!isLogin && !showForgotPassword && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className={`w-full p-3 text-sm sm:text-base border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+                    errors.name ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                  placeholder="Enter your full name"
+                />
+                {errors.name && <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.name}</p>}
+              </div>
             )}
-          </button>
-        </form>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address *
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className={`w-full p-3 text-sm sm:text-base border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+                  errors.email ? 'border-red-500' : 'border-gray-300'
+                }`}
+                placeholder="Enter your email"
+              />
+              {errors.email && <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.email}</p>}
+            </div>
+
+            {!showForgotPassword && (
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Password *
+                  </label>
+                  {isLogin && (
+                    <button
+                      type="button"
+                      onClick={showForgotPasswordForm}
+                      className="text-xs sm:text-sm text-primary hover:text-red-600 transition-colors"
+                    >
+                      Forgot password?
+                    </button>
+                  )}
+                </div>
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className={`w-full p-3 text-sm sm:text-base border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+                    errors.password ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                  placeholder="Enter your password"
+                />
+                {errors.password && <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.password}</p>}
+              </div>
+            )}
+
+            {!isLogin && !showForgotPassword && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Confirm Password *
+                </label>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  className={`w-full p-3 text-sm sm:text-base border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent ${
+                    errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                  placeholder="Confirm your password"
+                />
+                {errors.confirmPassword && <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.confirmPassword}</p>}
+              </div>
+            )}
+
+            {errors.general && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-red-600 text-xs sm:text-sm">{errors.general}</p>
+              </div>
+            )}
+
+            <div className="space-y-3">
+              <button
+                type="submit"
+                disabled={isLoading}
+                className={`w-full py-3 px-4 text-sm sm:text-base rounded-lg font-medium transition-colors ${
+                  isLoading
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-primary hover:bg-red-600 text-white'
+                }`}
+              >
+                {isLoading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white mr-2"></div>
+                    <span className="text-xs sm:text-sm">
+                      {showForgotPassword ? 'Sending...' : (isLogin ? 'Signing In...' : 'Creating Account...')}
+                    </span>
+                  </div>
+                ) : (
+                  showForgotPassword ? 'Send Reset Instructions' : (isLogin ? 'Sign In' : 'Create Account')
+                )}
+              </button>
+
+              {showForgotPassword && (
+                <button
+                  type="button"
+                  onClick={backToLogin}
+                  className="w-full py-3 px-4 text-sm sm:text-base rounded-lg font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Back to Sign In
+                </button>
+              )}
+            </div>
+          </form>
+        )}
 
         {/* Switch Mode */}
-        <div className="text-center mt-6 pt-6 border-t border-gray-200">
-          <p className="text-gray-600">
-            {isLogin ? "Don't have an account?" : 'Already have an account?'}
-          </p>
-          <button
-            onClick={switchMode}
-            className="text-primary hover:text-red-600 font-medium mt-1 transition-colors"
-          >
-            {isLogin ? 'Sign Up' : 'Sign In'}
-          </button>
-        </div>
+        {!showForgotPassword && !resetSuccess && (
+          <div className="text-center mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
+            <p className="text-xs sm:text-sm text-gray-600">
+              {isLogin ? "Don't have an account?" : 'Already have an account?'}
+            </p>
+            <button
+              onClick={switchMode}
+              className="text-sm sm:text-base text-primary hover:text-red-600 font-medium mt-1 transition-colors"
+            >
+              {isLogin ? 'Sign Up' : 'Sign In'}
+            </button>
+          </div>
+        )}
+
+        {/* Back to Sign In from Reset Success */}
+        {resetSuccess && (
+          <div className="text-center mt-4 sm:mt-6">
+            <button
+              onClick={backToLogin}
+              className="text-sm sm:text-base text-primary hover:text-red-600 font-medium transition-colors"
+            >
+              Back to Sign In
+            </button>
+          </div>
+        )}
 
         {/* Demo Account */}
-        {isLogin && (
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600 text-center mb-2">Demo Account:</p>
+        {isLogin && !showForgotPassword && !resetSuccess && (
+          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gray-50 rounded-lg">
+            <p className="text-xs sm:text-sm text-gray-600 text-center mb-2">Demo Account:</p>
             <div className="text-xs text-gray-500 text-center space-y-1">
               <div>Email: demo@duet.com</div>
               <div>Password: demo123</div>
@@ -305,7 +418,7 @@ const Authentication = ({ onLogin }: AuthenticationProps) => {
                   confirmPassword: ''
                 });
               }}
-              className="w-full mt-2 py-2 px-3 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300 transition-colors"
+              className="w-full mt-2 py-2 px-3 bg-gray-200 text-gray-700 rounded text-xs sm:text-sm hover:bg-gray-300 transition-colors"
             >
               Use Demo Account
             </button>
