@@ -15,7 +15,7 @@ const ProfileSetup = () => {
   const [profile, setProfile] = useState<Profile>({
     gender: '',
     preference: '',
-    photo: '/placeholder-avatar.png',
+    photo: '',
     summary: '',
     name: '',
   });
@@ -76,11 +76,17 @@ const ProfileSetup = () => {
   };
 
   const placeholderImages = [
-    '/placeholder-avatar.png',
     'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&h=200&fit=crop&crop=face',
     'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face',
     'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&h=200&fit=crop&crop=face',
+    'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face',
   ];
+
+  const defaultAvatar = 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&h=200&fit=crop&crop=face';
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    e.currentTarget.src = defaultAvatar;
+  };
 
   if (!isEditing && profile.name) {
     return (
@@ -88,8 +94,9 @@ const ProfileSetup = () => {
         <div className="card text-center">
           <div className="mb-6">
             <img
-              src={profile.photo}
+              src={profile.photo || defaultAvatar}
               alt="Profile"
+              onError={handleImageError}
               className="w-32 h-32 rounded-full mx-auto mb-4 object-cover border-4 border-primary"
             />
             <h2 className="text-2xl font-bold text-gray-800">{profile.name}</h2>
@@ -172,8 +179,9 @@ const ProfileSetup = () => {
             </label>
             <div className="flex flex-col items-center space-y-4">
               <img
-                src={profile.photo}
+                src={profile.photo || defaultAvatar}
                 alt="Profile preview"
+                onError={handleImageError}
                 className="w-24 h-24 rounded-full object-cover border-2 border-gray-300"
               />
               
@@ -202,7 +210,12 @@ const ProfileSetup = () => {
                     onClick={() => setProfile({ ...profile, photo: img })}
                     className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-300 hover:border-primary"
                   >
-                    <img src={img} alt={`Placeholder ${index + 1}`} className="w-full h-full object-cover" />
+                    <img 
+                      src={img} 
+                      alt={`Placeholder ${index + 1}`} 
+                      onError={handleImageError}
+                      className="w-full h-full object-cover" 
+                    />
                   </button>
                 ))}
               </div>

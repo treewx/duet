@@ -1,6 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+
+const defaultAvatar = 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&h=200&fit=crop&crop=face';
+
+const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+  e.currentTarget.src = defaultAvatar;
+};
 import { UserManager } from '../utils/userManager';
 
 interface Person {
@@ -182,8 +188,9 @@ const ViewCouples = () => {
           {/* Person 1 */}
           <div className="text-center">
             <img
-              src={currentCouple.person1.photo}
+              src={currentCouple.person1.photo || defaultAvatar}
               alt={currentCouple.person1.name}
+              onError={handleImageError}
               className="w-32 h-32 rounded-full object-cover mx-auto mb-3 border-4 border-primary"
             />
             <h3 className="font-bold text-lg text-gray-800">{currentCouple.person1.name}</h3>
@@ -199,8 +206,9 @@ const ViewCouples = () => {
           {/* Person 2 */}
           <div className="text-center">
             <img
-              src={currentCouple.person2.photo}
+              src={currentCouple.person2.photo || defaultAvatar}
               alt={currentCouple.person2.name}
+              onError={handleImageError}
               className="w-32 h-32 rounded-full object-cover mx-auto mb-3 border-4 border-secondary"
             />
             <h3 className="font-bold text-lg text-gray-800">{currentCouple.person2.name}</h3>

@@ -396,29 +396,6 @@ const Authentication = ({ onLogin }: AuthenticationProps) => {
           </div>
         )}
 
-        {/* Demo Account */}
-        {isLogin && !showForgotPassword && !resetSuccess && (
-          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gray-50 rounded-lg">
-            <p className="text-xs sm:text-sm text-gray-600 text-center mb-2">Demo Account:</p>
-            <div className="text-xs text-gray-500 text-center space-y-1">
-              <div>Email: demo@duet.com</div>
-              <div>Password: demo123</div>
-            </div>
-            <button
-              onClick={() => {
-                setFormData({
-                  email: 'demo@duet.com',
-                  password: 'demo123',
-                  name: '',
-                  confirmPassword: ''
-                });
-              }}
-              className="w-full mt-2 py-2 px-3 bg-gray-200 text-gray-700 rounded text-xs sm:text-sm hover:bg-gray-300 transition-colors"
-            >
-              Use Demo Account
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

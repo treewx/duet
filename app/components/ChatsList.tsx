@@ -2,6 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import Chat from './Chat';
+
+const defaultAvatar = 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&h=200&fit=crop&crop=face';
+
+const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+  e.currentTarget.src = defaultAvatar;
+};
 import { UserManager } from '../utils/userManager';
 
 interface Person {
@@ -302,8 +308,9 @@ const ChatsList = () => {
             {/* Profile Photo */}
             <div className="flex-shrink-0 relative">
               <img
-                src={chat.person.photo}
+                src={chat.person.photo || defaultAvatar}
                 alt={chat.person.name}
+                onError={handleImageError}
                 className="w-16 h-16 rounded-full object-cover border-2 border-primary"
               />
               {chat.unreadCount > 0 && (

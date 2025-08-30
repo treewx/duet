@@ -2,6 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react';
 
+const defaultAvatar = 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&h=200&fit=crop&crop=face';
+
+const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+  e.currentTarget.src = defaultAvatar;
+};
+
 interface Person {
   id: string;
   name: string;
@@ -155,8 +161,9 @@ const Chat = ({ currentUser, chatPartner, onBack }: ChatProps) => {
         </button>
         
         <img
-          src={chatPartner.photo}
+          src={chatPartner.photo || defaultAvatar}
           alt={chatPartner.name}
+          onError={handleImageError}
           className="w-10 h-10 rounded-full object-cover border-2 border-primary"
         />
         
